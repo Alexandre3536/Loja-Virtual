@@ -7,29 +7,30 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [
-    // Configuração para servir a página HTML, CSS e JS
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-      serveRoot: '/',
-    }),
-    // Configuração para servir os arquivos da pasta 'uploads'
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads',
-    }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'mvpp_db',
-      autoLoadEntities: true,
-      synchronize: false,
-    }),
-    ProdutoModule,
-    AuthModule,
-  ],
+  imports: [
+    // Configuração para servir a página HTML, CSS e JS (manter para desenvolvimento local)
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/',
+    }),
+    // Configuração para servir os arquivos da pasta 'uploads'
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL, // Use a variável de ambiente do Render aqui
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'postgres',
+      database: 'mvpp_db',
+      autoLoadEntities: true,
+      synchronize: false,
+    }),
+    ProdutoModule,
+    AuthModule,
+  ],
 })
 export class AppModule {}
