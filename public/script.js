@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const descricaoInput = document.getElementById('descricao');
     const mediaForm = document.getElementById('media-form');
     const productPhoto = document.getElementById('product-photo');
-    const urlBase = 'http://localhost:3000/produtos';
-    const uploadsUrl = 'http://localhost:3000/uploads';
+    const urlBase = 'https://loja-virtual-1-5c8z.onrender.com/produtos';
+    const uploadsUrl = 'https://loja-virtual-1-5c8z.onrender.com/uploads';
 
     let currentPhotos = [];
     let photoIndex = 0;

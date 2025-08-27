@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://loja-virtual-1-5c8z.onrender.com';
 
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');

@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/produtos';
+const API_URL = 'https://loja-virtual-1-5c8z.onrender.com/produtos';
 
 const produtoForm = document.getElementById('produtoForm');
 const produtosTable = document.getElementById('produtosTable').getElementsByTagName('tbody')[0];

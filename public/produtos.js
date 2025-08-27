@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const productListContainer = document.getElementById('product-list');
-    const urlBase = 'http://localhost:3000/produtos';
-    const uploadsUrl = 'http://localhost:3000/uploads';
+    const urlBase = 'https://loja-virtual-1-5c8z.onrender.com/produtos';
+    const uploadsUrl = 'https://loja-virtual-1-5c8z.onrender.com/uploads';
 
     async function fetchProducts() {
         try {
