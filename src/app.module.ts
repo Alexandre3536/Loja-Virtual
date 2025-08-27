@@ -23,6 +23,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: false,
+      ssl: true, // Adicione esta linha
     }),
     ProdutoModule,
     AuthModule,
