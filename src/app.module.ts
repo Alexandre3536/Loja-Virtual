@@ -15,7 +15,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     // Configuração para servir os arquivos da pasta 'uploads'
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(__dirname, '..','dist', 'uploads'),
       serveRoot: '/uploads',
     }),
     TypeOrmModule.forRoot({
