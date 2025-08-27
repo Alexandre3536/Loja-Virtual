@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const videoPlayer = document.createElement('video');
     videoPlayer.controls = true;
 
-    const urlBase = 'http://localhost:3000/produtos';
-    const uploadsUrl = 'http://localhost:3000/uploads';
+    const urlBase = 'https://loja-virtual-1-5c8z.onrender.com/produtos';
+    const uploadsUrl = 'https://loja-virtual-1-5c8z.onrender.com/uploads';
 
     let photoIndex = 0;
     let photoInterval;
