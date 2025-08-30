@@ -17,6 +17,9 @@ import { join } from 'path';
       database: process.env.DB_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Use apenas para desenvolvimento!
+      ssl: {
+        rejectUnauthorized: false,
+      },
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
