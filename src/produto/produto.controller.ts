@@ -1,4 +1,3 @@
-// src/produto/produto.controller.ts
 import {
   Controller,
   Get,
@@ -7,16 +6,16 @@ import {
   Delete,
   Param,
   Body,
+  UploadedFile,
   UploadedFiles,
   UseInterceptors,
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProdutoService } from './produto.service';
 import { Produto } from './produto.entity';
-import { diskStorage } from 'multer';
-import * as path from 'path';
+import { cloudinary } from '../cloudinary/cloudinary.config';
 
 @Controller('produtos')
 export class ProdutoController {
@@ -33,22 +32,39 @@ export class ProdutoController {
   }
 
   @Post()
-  create(@Body() produto: Produto): Promise<Produto> {
-    return this.produtoService.create(produto);
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @Body() produtoData: Partial<Produto>,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<Produto> {
+    if (!file) {
+      throw new InternalServerErrorException('Nenhuma imagem enviada.');
+    }
+
+    try {
+      // 1. Envia a imagem para o Cloudinary
+      const result = await cloudinary.uploader.upload(file.path);
+
+      const produto = new Produto();
+      
+      // 2. Garante que os valores do corpo são strings
+      produto.nome = produtoData.nome || '';
+      produto.descricao = produtoData.descricao || '';
+      
+      // 3. Converte o preço para número (evita erro de tipo)
+      produto.preco = Number(produtoData.preco) || 0;
+      
+      // 4. Salva a URL da imagem no banco de dados
+      produto.foto1 = result.secure_url;
+      
+      return this.produtoService.create(produto);
+    } catch (error) {
+      throw new InternalServerErrorException('Erro ao fazer upload da imagem ou processar os dados.');
+    }
   }
 
   @Put(':id')
-  @UseInterceptors(
-    FilesInterceptor('files', 5, { // 'files' é o nome do campo no seu FormData
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const filename = `${Date.now()}-${file.originalname}`;
-          cb(null, filename);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FilesInterceptor('files', 5))
   async update(
     @Param('id') id: string,
     @Body() updateData: Partial<Produto>,
@@ -57,6 +73,20 @@ export class ProdutoController {
     if (!updateData) {
       throw new InternalServerErrorException('Dados de atualização ausentes.');
     }
+    
+    if (files && files.length > 0) {
+      try {
+        const uploadPromises = files.map(file => cloudinary.uploader.upload(file.path));
+        const results = await Promise.all(uploadPromises);
+        
+        if (results.length > 0) {
+            updateData.foto1 = results[0].secure_url;
+        }
+      } catch (error) {
+          throw new InternalServerErrorException('Erro ao fazer upload das imagens para o Cloudinary.');
+      }
+    }
+
     return this.produtoService.update(+id, updateData, files);
   }
 
