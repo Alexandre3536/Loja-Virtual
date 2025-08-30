@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
 import { UsuarioModule } from '../usuario/usuario.module';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { jwtConstants } from './constants';
-import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
@@ -13,11 +13,11 @@ import { AuthController } from './auth.controller';
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60m' }, // Token expira em 60 minutos
+      signOptions: { expiresIn: '60m' },
     }),
   ],
+  controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
   exports: [AuthService],
-  controllers: [AuthController],
 })
 export class AuthModule {}

@@ -1,53 +1,41 @@
-import { Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { UsuarioService } from '../usuario/usuario.service';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { Usuario } from 'src/usuario/usuario.entity';
+import { Usuario } from '../usuario/usuario.entity';
+import { CreateUsuarioDto } from '../usuario/create-usuario.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usuariosService: UsuarioService,
+    private usuarioService: UsuarioService,
     private jwtService: JwtService,
   ) {}
 
-  async validateUsuario(email: string, senha: string): Promise<any> {
-    const usuario = await this.usuariosService.buscarPorEmail(email);
-    if (usuario && (await bcrypt.compare(senha, usuario.senha))) {
-      const { senha, ...result } = usuario;
-      return result;
-    }
-    return null;
-  }
-
-  async login(usuario: any) {
-    const payload = { email: usuario.email, sub: usuario.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  }
-
   async register(usuarioData: Partial<Usuario>): Promise<Usuario> {
-    if (!usuarioData.email) {
-      throw new InternalServerErrorException('E-mail do usuário não fornecido.');
-    }
-    
-    const usuarioExistente = await this.usuariosService.buscarPorEmail(
-      usuarioData.email,
-    );
+    const { email, senha, nome } = usuarioData;
 
-    if (usuarioExistente) {
-      throw new UnauthorizedException('Este e-mail já está em uso.');
-    }
-    
-    if (!usuarioData.senha) {
-      throw new UnauthorizedException('A senha é obrigatória para o cadastro.');
+    // validação obrigatória
+    if (!email || !senha) {
+      throw new BadRequestException('Email e senha são obrigatórios');
     }
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(usuarioData.senha, salt);
-    usuarioData.senha = hashedPassword;
+    const existing = await this.usuarioService.findByEmail(email);
+    if (existing) throw new UnauthorizedException('Email já cadastrado');
 
-    return this.usuariosService.criar(usuarioData.email, usuarioData.senha);
+    const dto: CreateUsuarioDto = { email, senha, nome };
+    return this.usuarioService.create(dto);
+  }
+
+  async validateUsuario(email: string, senha: string): Promise<Usuario | null> {
+    const usuario = await this.usuarioService.findByEmail(email);
+    if (!usuario) return null;
+
+    const valid = await this.usuarioService.validatePassword(usuario, senha);
+    return valid ? usuario : null;
+  }
+
+  async login(usuario: Usuario) {
+    const payload = { sub: usuario.id, email: usuario.email };
+    return { access_token: this.jwtService.sign(payload) };
   }
 }

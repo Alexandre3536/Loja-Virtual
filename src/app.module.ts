@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProdutoModule } from './produto/produto.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { AuthModule } from './auth/auth.module';
+import { UsuarioModule } from './usuario/usuario.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { join } from 'path';
       serveRoot: '/uploads',
     }),
     ProdutoModule,
+    AuthModule,      // <- acrescentado
+    UsuarioModule,   // <- acrescentado
   ],
   controllers: [AppController],
   providers: [AppService],
