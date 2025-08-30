@@ -1,39 +1,33 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProdutoModule } from './produto/produto.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
-const getDatabaseConfig = (): TypeOrmModuleOptions => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const dbUrl = process.env.DATABASE_URL;
-
-  if (isProduction && dbUrl) {
-    const parsedUrl = new URL(dbUrl);
-    return {
+@Module({
+  imports: [
+    TypeOrmModule.forRoot({
       type: 'postgres',
-      host: parsedUrl.hostname,
-      port: parseInt(parsedUrl.port, 10),
-      username: parsedUrl.username,
-      password: parsedUrl.password,
-      database: parsedUrl.pathname.slice(1),
-      ssl: true, // 👈 habilita SSL
-      extra: {
-        ssl: {
-          rejectUnauthorized: false, // 👈 config extra pro Render
-        },
-      },
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT || '5432', 10),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false,
-    };
-  }
-
-  return {
-    type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USERNAME || 'seu-usuario',
-    password: process.env.DB_PASSWORD || 'sua-senha',
-    database: process.env.DB_DATABASE || 'seu-banco',
-    entities: [__dirname + '/**/*.entity{.ts,.js}'],
-    synchronize: true,
-  };
-};
-
-export default getDatabaseConfig;
+      synchronize: true, // Use apenas para desenvolvimento!
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
+    ProdutoModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
