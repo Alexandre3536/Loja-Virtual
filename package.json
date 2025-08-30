@@ -28,10 +28,7 @@
     "@nestjs/serve-static": "^5.0.3",
     "@nestjs/typeorm": "^11.0.0",
     "bcrypt": "^6.0.0",
-<<<<<<< HEAD
-=======
     "cloudinary": "^2.7.0",
->>>>>>> ce108b0feba30ccbe1c717a221f96cc8afa914c6
     "express": "^5.1.0",
     "multer": "^2.0.2",
     "open": "^10.2.0",
