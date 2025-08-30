@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build && cp -r uploads dist/uploads",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -28,7 +28,6 @@
     "@nestjs/serve-static": "^5.0.3",
     "@nestjs/typeorm": "^11.0.0",
     "bcrypt": "^6.0.0",
-    "cloudinary": "^2.7.0",
     "express": "^5.1.0",
     "multer": "^2.0.2",
     "open": "^10.2.0",
