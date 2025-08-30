@@ -1,54 +1,30 @@
-<<<<<<< HEAD
-// src/app.module.ts
-=======
->>>>>>> ce108b0feba30ccbe1c717a221f96cc8afa914c6
 import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProdutoModule } from './produto/produto.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { ProdutoModule } from './produto/produto.module';
-import { AuthModule } from './auth/auth.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-<<<<<<< HEAD
-  imports: [
-    // Configuração para servir a página HTML, CSS e JS (manter para desenvolvimento local)
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-      serveRoot: '/',
-    }),
-    // Configuração para servir os arquivos da pasta 'uploads'
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..','dist', 'uploads'),
-      serveRoot: '/uploads',
-    }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      autoLoadEntities: true,
-      synchronize: true,
-      ssl: true, // Adicione esta linha
-    }),
-    ProdutoModule,
-    AuthModule,
-  ],
-=======
   imports: [
-    // Configuração para servir a página HTML, CSS e JS do frontend
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-      serveRoot: '/',
-    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
-      autoLoadEntities: true,
-      synchronize: true,
-      ssl: true,
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT || '5432', 10),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true, // Use apenas para desenvolvimento!
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
     }),
     ProdutoModule,
-    AuthModule,
   ],
->>>>>>> ce108b0feba30ccbe1c717a221f96cc8afa914c6
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
