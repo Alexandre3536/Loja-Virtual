@@ -13,9 +13,12 @@ const getDatabaseConfig = (): TypeOrmModuleOptions => {
       username: parsedUrl.username,
       password: parsedUrl.password,
       database: parsedUrl.pathname.slice(1),
-      ssl: {
-        rejectUnauthorized: false,
-      } as any, // 👈 cast necessário
+      ssl: true, // 👈 habilita SSL
+      extra: {
+        ssl: {
+          rejectUnauthorized: false, // 👈 config extra pro Render
+        },
+      },
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false,
     };
@@ -32,3 +35,5 @@ const getDatabaseConfig = (): TypeOrmModuleOptions => {
     synchronize: true,
   };
 };
+
+export default getDatabaseConfig;
