@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // src/app.module.ts
+=======
+>>>>>>> ce108b0feba30ccbe1c717a221f96cc8afa914c6
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -7,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
+<<<<<<< HEAD
   imports: [
     // Configuração para servir a página HTML, CSS e JS (manter para desenvolvimento local)
     ServeStaticModule.forRoot({
@@ -28,5 +32,23 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     ProdutoModule,
     AuthModule,
   ],
+=======
+  imports: [
+    // Configuração para servir a página HTML, CSS e JS do frontend
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/',
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      autoLoadEntities: true,
+      synchronize: true,
+      ssl: true,
+    }),
+    ProdutoModule,
+    AuthModule,
+  ],
+>>>>>>> ce108b0feba30ccbe1c717a221f96cc8afa914c6
 })
 export class AppModule {}
