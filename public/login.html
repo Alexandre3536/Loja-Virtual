@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Login e Cadastro</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .container { background-color: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); text-align: center; }
+    h1 { color: #333; }
+    form { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+    button { padding: 12px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; color: #fff; }
+    #login-form button { background-color: #007bff; }
+    #register-form button { background-color: #28a745; }
+    .message { margin-top: 10px; color: red; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Login</h1>
+    <form id="login-form">
+      <input type="email" id="login-email" placeholder="Email" required>
+      <input type="password" id="login-senha" placeholder="Senha" required>
+      <button type="submit">Entrar</button>
+      <div id="login-message" class="message"></div>
+    </form>
+
+    <hr style="margin: 30px 0;">
+
+    <h1>Cadastro</h1>
+    <form id="register-form">
+      <input type="email" id="register-email" placeholder="Email" required>
+      <input type="password" id="register-senha" placeholder="Senha" required>
+      <button type="submit">Cadastrar</button>
+      <div id="register-message" class="message"></div>
+    </form>
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>
