@@ -1,23 +1,17 @@
-import { CreateProdutoDto } from './create-produto.dto';
-
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  UploadedFiles,
-  UseInterceptors,
-  NotFoundException,
-  InternalServerErrorException,
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Put, 
+  Delete, 
+  Param, 
+  Body, 
+  NotFoundException, 
+  InternalServerErrorException 
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProdutoService } from './produto.service';
 import { Produto } from './produto.entity';
-import { diskStorage } from 'multer';
-import * as path from 'path';
+import { CreateProdutoDto } from './create-produto.dto';
 
 @Controller('produtos')
 export class ProdutoController {
@@ -39,26 +33,20 @@ export class ProdutoController {
   }
 
   @Put(':id')
-  @UseInterceptors(
-    FilesInterceptor('files', 5, {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const filename = `${Date.now()}-${file.originalname}`;
-          cb(null, filename);
-        },
-      }),
-    }),
-  )
   async update(
     @Param('id') id: string,
-    @Body() updateData: Partial<Produto>,
-    @UploadedFiles() files: Express.Multer.File[],
-  ) {
+    @Body() updateData: Partial<Produto>, // Aqui o frontend envia preco, descricao, foto1, foto2, foto3, video_url
+  ): Promise<Produto> {
     if (!updateData) {
       throw new InternalServerErrorException('Dados de atualização ausentes.');
     }
-    return this.produtoService.update(+id, updateData, files);
+
+    const produto = await this.produtoService.update(+id, updateData);
+    if (!produto) {
+      throw new NotFoundException('Produto não encontrado.');
+    }
+
+    return produto;
   }
 
   @Delete(':id')

@@ -1,147 +1,171 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const produtoSelect = document.getElementById('produto-select');
-    const precoInput = document.getElementById('preco');
-    const descricaoInput = document.getElementById('descricao');
-    const mediaForm = document.getElementById('media-form');
-    const productPhoto = document.getElementById('product-photo');
-    const urlBase = 'https://loja-virtual-1-5c8z.onrender.com/produtos';
-    const uploadsUrl = 'https://loja-virtual-1-5c8z.onrender.com/uploads';
+  const produtoSelect = document.getElementById('produto-select');
+  const precoInput = document.getElementById('preco');
+  const descricaoInput = document.getElementById('descricao');
+  const mediaForm = document.getElementById('media-form');
+  const productPhoto = document.getElementById('product-photo');
 
-    let currentPhotos = [];
-    let photoIndex = 0;
-    let photoInterval;
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // CONFIGURE AQUI seu Cloudinary
+  const CLOUD_NAME = 'dbikjkasx';
+  const UPLOAD_PRESET = 'imagens';
+  const CLOUDINARY_IMAGE_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+  const CLOUDINARY_VIDEO_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
+  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    // Função para carregar os produtos do backend
-    async function carregarProdutos() {
-        try {
-            const response = await fetch(urlBase);
-            if (!response.ok) {
-                throw new Error('Erro ao carregar os produtos.');
-            }
-            const produtos = await response.json();
-            
-            produtoSelect.innerHTML = '';
-            
-            const optionDefault = document.createElement('option');
-            optionDefault.value = '';
-            optionDefault.textContent = 'Selecione um produto';
-            produtoSelect.appendChild(optionDefault);
+  const urlBase = 'https://loja-virtual-1-5c8z.onrender.com/produtos';
 
-            produtos.forEach(produto => {
-                const option = document.createElement('option');
-                option.value = produto.id;
-                option.textContent = produto.nome;
-                produtoSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Erro ao carregar produtos:', error);
-            // O alerta de erro foi removido daqui
-        }
+  let currentPhotos = [];
+  let photoIndex = 0;
+  let photoInterval;
+
+  async function carregarProdutos() {
+    try {
+      const response = await fetch(urlBase);
+      if (!response.ok) throw new Error('Erro ao carregar os produtos.');
+      const produtos = await response.json();
+
+      produtoSelect.innerHTML = '';
+
+      const optionDefault = document.createElement('option');
+      optionDefault.value = '';
+      optionDefault.textContent = 'Selecione um produto';
+      produtoSelect.appendChild(optionDefault);
+
+      produtos.forEach(produto => {
+        const option = document.createElement('option');
+        option.value = produto.id;
+        option.textContent = produto.nome;
+        produtoSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error);
     }
+  }
 
-    // Função para mudar a foto exibida
-    function changePhoto() {
+  function changePhoto() {
+    if (currentPhotos.length > 0) {
+      productPhoto.src = currentPhotos[photoIndex];
+      photoIndex = (photoIndex + 1) % currentPhotos.length;
+    } else {
+      productPhoto.src = '';
+    }
+  }
+
+  await carregarProdutos();
+
+  produtoSelect.addEventListener('change', async () => {
+    const produtoId = produtoSelect.value;
+    if (produtoId) {
+      try {
+        const response = await fetch(`${urlBase}/${produtoId}`);
+        if (!response.ok) throw new Error('Produto não encontrado.');
+        const produto = await response.json();
+
+        precoInput.value = produto.preco || '';
+        descricaoInput.value = produto.descricao || '';
+
+        currentPhotos = [];
+        if (produto.foto1) currentPhotos.push(produto.foto1);
+        if (produto.foto2) currentPhotos.push(produto.foto2);
+        if (produto.foto3) currentPhotos.push(produto.foto3);
+
+        photoIndex = 0;
+        clearInterval(photoInterval);
+
         if (currentPhotos.length > 0) {
-            productPhoto.src = `${uploadsUrl}/${currentPhotos[photoIndex]}`;
-            photoIndex = (photoIndex + 1) % currentPhotos.length;
+          changePhoto();
+          photoInterval = setInterval(changePhoto, 5000);
         } else {
-            productPhoto.src = '';
+          productPhoto.src = '';
         }
+      } catch (error) {
+        console.error('Erro ao buscar detalhes do produto:', error);
+      }
+    } else {
+      precoInput.value = '';
+      descricaoInput.value = '';
+      productPhoto.src = '';
+      clearInterval(photoInterval);
     }
+  });
 
-    // Carrega os produtos ao iniciar a página
-    await carregarProdutos();
+  async function uploadToCloudinary(file, resourceType = 'image') {
+    const endpoint = resourceType === 'video'
+      ? CLOUDINARY_VIDEO_UPLOAD_URL
+      : CLOUDINARY_IMAGE_UPLOAD_URL;
 
-    // Evento para quando o usuário selecionar um produto
-    produtoSelect.addEventListener('change', async () => {
-        const produtoId = produtoSelect.value;
-        if (produtoId) {
-            try {
-                const response = await fetch(`${urlBase}/${produtoId}`);
-                if (!response.ok) {
-                    throw new Error('Produto não encontrado.');
-                }
-                const produto = await response.json();
-                
-                precoInput.value = produto.preco || '';
-                descricaoInput.value = produto.descricao || '';
-                
-                // Lógica do carrossel
-                currentPhotos = [];
-                if (produto.foto1) currentPhotos.push(produto.foto1);
-                if (produto.foto2) currentPhotos.push(produto.foto2);
-                if (produto.foto3) currentPhotos.push(produto.foto3);
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', UPLOAD_PRESET);
 
-                photoIndex = 0;
-                clearInterval(photoInterval);
+    const resp = await fetch(endpoint, { method: 'POST', body: fd });
+    if (!resp.ok) {
+      const t = await resp.text();
+      throw new Error(`Falha no upload Cloudinary: ${t}`);
+    }
+    const data = await resp.json();
+    return data.secure_url;
+  }
 
-                if (currentPhotos.length > 0) {
-                    changePhoto();
-                    photoInterval = setInterval(changePhoto, 5000);
-                } else {
-                    productPhoto.src = '';
-                }
-            } catch (error) {
-                console.error('Erro ao buscar detalhes do produto:', error);
-                // O alerta de erro foi removido daqui
-            }
-        } else {
-            precoInput.value = '';
-            descricaoInput.value = '';
-            productPhoto.src = '';
-            clearInterval(photoInterval);
+  function isVideoFile(file) {
+    return file && file.type && file.type.startsWith('video/');
+  }
+
+  mediaForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const produtoId = produtoSelect.value;
+    if (!produtoId) return;
+
+    const fotosInput = document.getElementById('fotos');
+    const videoInput = document.getElementById('video');
+
+    const urlsFotos = [];
+    let urlVideo = '';
+
+    try {
+      if (fotosInput.files.length > 0) {
+        const files = Array.from(fotosInput.files).slice(0, 3);
+        for (const file of files) {
+          const url = await uploadToCloudinary(file, 'image');
+          urlsFotos.push(url);
         }
-    });
+      }
 
-    // Evento para enviar o formulário
-    mediaForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
+      if (videoInput.files[0]) {
+        const file = videoInput.files[0];
+        const url = await uploadToCloudinary(file, isVideoFile(file) ? 'video' : 'image');
+        urlVideo = url;
+      }
 
-        const produtoId = produtoSelect.value;
-        if (!produtoId) {
-            // O alerta de aviso de produto não selecionado foi removido
-            return;
-        }
+      const formData = new FormData();
+      formData.append('preco', precoInput.value);
+      formData.append('descricao', descricaoInput.value);
 
-        const formData = new FormData();
-        const fotosInput = document.getElementById('fotos');
-        const videoInput = document.getElementById('video');
+      if (urlsFotos[0]) formData.append('foto1', urlsFotos[0]);
+      if (urlsFotos[1]) formData.append('foto2', urlsFotos[1]);
+      if (urlsFotos[2]) formData.append('foto3', urlsFotos[2]);
+      if (urlVideo) formData.append('video_url', urlVideo);
 
-        formData.append('preco', precoInput.value);
-        formData.append('descricao', descricaoInput.value);
+      const response = await fetch(`${urlBase}/${produtoId}`, {
+        method: 'PUT',
+        body: formData,
+      });
 
-        if (fotosInput.files.length > 0) {
-            for (const file of fotosInput.files) {
-                formData.append('files', file);
-            }
-        }
-
-        if (videoInput.files[0]) {
-            formData.append('files', videoInput.files[0]);
-        }
-
-        try {
-            const response = await fetch(`${urlBase}/${produtoId}`, {
-                method: 'PUT',
-                body: formData,
-            });
-
-            if (response.ok) {
-                // O alerta de sucesso foi removido
-                mediaForm.reset();
-                precoInput.value = '';
-                descricaoInput.value = '';
-                await carregarProdutos();
-                clearInterval(photoInterval);
-                productPhoto.src = '';
-            } else {
-                const errorText = await response.text();
-                console.error('Erro ao atualizar o produto:', errorText);
-                // O alerta de erro foi removido daqui
-            }
-        } catch (error) {
-            console.error('Erro de conexão com o servidor:', error);
-            // O alerta de erro de conexão foi removido daqui
-        }
-    });
+      if (response.ok) {
+        mediaForm.reset();
+        precoInput.value = '';
+        descricaoInput.value = '';
+        await carregarProdutos();
+        clearInterval(photoInterval);
+        productPhoto.src = '';
+      } else {
+        const errorText = await response.text();
+        console.error('Erro ao atualizar o produto:', errorText);
+      }
+    } catch (error) {
+      console.error('Erro no upload/atualização:', error);
+    }
+  });
 });
