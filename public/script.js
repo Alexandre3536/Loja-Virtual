@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         foto1: urlsFotos[0] || undefined,
         foto2: urlsFotos[1] || undefined,
         foto3: urlsFotos[2] || undefined,
-        video_url: urlVideo || undefined,
+        video: urlVideo || undefined,
       };
 
       // Envia JSON para o back-end
