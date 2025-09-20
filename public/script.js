@@ -5,13 +5,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const mediaForm = document.getElementById('media-form');
   const productPhoto = document.getElementById('product-photo');
 
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // CONFIGURE AQUI seu Cloudinary
+  // >>>> CONFIGURAÇÃO CLOUDINARY
   const CLOUD_NAME = 'dxbjjkusy';
   const UPLOAD_PRESET = 'imagens';
   const CLOUDINARY_IMAGE_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
   const CLOUDINARY_VIDEO_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
-  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
   const urlBase = 'https://loja-virtual-1-5c8z.onrender.com/produtos';
 
@@ -125,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let urlVideo = '';
 
     try {
+      // Upload imagens
       if (fotosInput.files.length > 0) {
         const files = Array.from(fotosInput.files).slice(0, 3);
         for (const file of files) {
@@ -133,24 +132,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
+      // Upload vídeo
       if (videoInput.files[0]) {
         const file = videoInput.files[0];
         const url = await uploadToCloudinary(file, isVideoFile(file) ? 'video' : 'image');
         urlVideo = url;
       }
 
-      const formData = new FormData();
-      formData.append('preco', precoInput.value);
-      formData.append('descricao', descricaoInput.value);
+      // Monta o JSON
+      const body = {
+        preco: precoInput.value,
+        descricao: descricaoInput.value,
+        foto1: urlsFotos[0] || undefined,
+        foto2: urlsFotos[1] || undefined,
+        foto3: urlsFotos[2] || undefined,
+        video_url: urlVideo || undefined,
+      };
 
-      if (urlsFotos[0]) formData.append('foto1', urlsFotos[0]);
-      if (urlsFotos[1]) formData.append('foto2', urlsFotos[1]);
-      if (urlsFotos[2]) formData.append('foto3', urlsFotos[2]);
-      if (urlVideo) formData.append('video_url', urlVideo);
-
+      // Envia JSON para o back-end
       const response = await fetch(`${urlBase}/${produtoId}`, {
         method: 'PUT',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
