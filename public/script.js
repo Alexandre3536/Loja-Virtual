@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   // CONFIGURE AQUI seu Cloudinary
-  const CLOUD_NAME = 'dbikjkasx';
+  const CLOUD_NAME = 'dxbjjkusy';
   const UPLOAD_PRESET = 'imagens';
   const CLOUDINARY_IMAGE_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
   const CLOUDINARY_VIDEO_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
